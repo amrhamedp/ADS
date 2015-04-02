@@ -68,13 +68,14 @@ def spider():
 	enzyme_lines = enzyme_content.split('\n')
 
 	TOTAL= len(enzyme_lines)
+	print('TOTAL:  ' + str(TOTAL))
 
 	enzyme_ids = map(lambda line:line[0:11].strip(), enzyme_lines)
 
 	## multithread inserting
 	pool = ThreadPool(10)
 	try:
-		pool.map(lambda id:insertEnzymeTreeWith(id, db), enzyme_ids )
+		pool.map(lambda id:insertEnzymeTreeWith_safe(id, db), enzyme_ids )
 	except Exception,e:
 		print("Error: " + e.message)
 
@@ -97,6 +98,14 @@ def spider():
 
 	conn.close()
 
+def insertEnzymeTreeWith_safe( enzyme_id, db ):
+	try:
+		insertEnzymeTreeWith(enzyme_id, db)
+	except Exception,e:
+		print("FAIL "enzyme_id + '\n')
+		return
+
+:
 
 def insertEnzymeTreeWith(enzyme_id, db):
 	enzyme_obj = KEGG_lib.KEGG_raw2obj( KEGG.getItemContent( enzyme_id ) )
