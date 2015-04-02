@@ -80,6 +80,8 @@ def spider():
 
 def insertEnzymeTreeWith(enzyme_id, db):
 	enzyme_obj = KEGG_lib.KEGG_raw2obj( KEGG.getItemContent( enzyme_id ) )
+	if type(enzyme_obj['ALL_REAC']) != list:
+		enzyme_obj['ALL_REAC'] = [enzyme_obj['ALL_REAC']]
 	enzyme_obj['ALL_REAC'] = map( lambda s: re.findall( "R\d{5}", s ), enzyme_obj['ALL_REAC'] )
 	enzyme_obj['ALL_REAC'] = [item for l in enzyme_obj['ALL_REAC'] for item in l]
 	reaction_ids = enzyme_obj['ALL_REAC']
