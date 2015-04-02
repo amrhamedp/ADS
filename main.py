@@ -3,8 +3,10 @@ __author__ = 'feiyicheng'
 import urllib2
 import re
 import pymongo
-from bson import ObjectId
+from multiprocessing.dummy import Pool as ThreadPool
 
+TOTAL = 0
+COUNT = 0
 
 
 class KEGG:
@@ -52,17 +54,34 @@ class KEGG_lib:
 
 
 def spider():
+	# initialize the count
+	COUNT = 0
+
+
 	# connect the local mongodb
 	conn = pymongo.Connection( )
 	db = conn.adsdata
-
 
 	logfile = open("./runtime.log", "a")
 
 	enzyme_content = KEGG.getList('enzyme')
 	enzyme_lines = enzyme_content.split('\n')
-	count = 0
-	total = len(enzyme_lines)
+
+	TOTAL= len(enzyme_lines)
+
+	enzyme_ids = map(lambda line:line[0:11].strip(), enzyme_lines)
+
+	## multithread inserting
+	pool = ThreadPool(10)
+	try:
+		pool.map(lambda id:insertEnzymeTreeWith(id, db), enzyme_ids )
+	except Exception,e:
+		print("Error: " + e.message)
+
+	pool.close()
+	pool.join()
+
+	""" loop implementation/ single thread
 	for line in enzyme_lines:
 		enzyme_id = line[0:11].strip()
 		print "enzyme_id:"
@@ -74,12 +93,15 @@ def spider():
 			print("%d / %d error"%(count, total) + '\n' + e.message)
 		count += 1
 		print("%d / %d completed" %(count, total))
+	"""
 
 	conn.close()
 
 
 def insertEnzymeTreeWith(enzyme_id, db):
 	enzyme_obj = KEGG_lib.KEGG_raw2obj( KEGG.getItemContent( enzyme_id ) )
+	if 'ALL_REAC' not in enzyme_obj.keys():
+		return
 	if type(enzyme_obj['ALL_REAC']) != list:
 		enzyme_obj['ALL_REAC'] = [enzyme_obj['ALL_REAC']]
 	enzyme_obj['ALL_REAC'] = map( lambda s: re.findall( "R\d{5}", s ), enzyme_obj['ALL_REAC'] )
@@ -102,20 +124,19 @@ def insertEnzymeTreeWith(enzyme_id, db):
 		reaction_ins.append( reaction_in )
 	enzyme_obj['REF_REACTION'] = reaction_ins
 	enzyme_in = db.enzyme.insert( enzyme_obj )
-
+	COUNT += 1
+	print("%d / %d completed"%(COUNT, TOTAL))
 
 
 
 def getReactantsAndOutcomes(reaction_obj):
 	equation = reaction_obj['EQUATION']
-	print "equation: "
-	print equation
+	# print "equation: "
+	# print equation
 	reactants_str = equation.split('<=>')[0]
 	outcomes_str= equation.split( '<=>' )[1]
-	reactants = reactants_str.split('+')
-	outcomes= outcomes_str.split( '+' )
-	reactants = [r.strip() for r in reactants]
-	outcomes = [r.strip( ) for r in outcomes]
+	reactants = re.findall( "C\d{5}", reactants_str)
+	outcomes = re.findall("C\d{5}", outcomes_str)
 	return((reactants,outcomes))
 
 
