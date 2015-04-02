@@ -55,6 +55,8 @@ class KEGG_lib:
 
 def spider():
 	# initialize the count
+	global COUNT
+	global TOTAL
 	COUNT = 0
 
 
@@ -67,10 +69,10 @@ def spider():
 	enzyme_content = KEGG.getList('enzyme')
 	enzyme_lines = enzyme_content.split('\n')
 
-	TOTAL= len(enzyme_lines)
+	TOTAL = len(enzyme_lines)
 	print('TOTAL:  ' + str(TOTAL))
 
-	enzyme_ids = map(lambda line:line[0:11].strip(), enzyme_lines)
+	enzyme_ids = map(lambda line: line.split('\t')[0], enzyme_lines)
 
 	## multithread inserting
 	pool = ThreadPool(10)
@@ -101,23 +103,24 @@ def spider():
 def insertEnzymeTreeWith_safe( enzyme_id, db ):
 	try:
 		insertEnzymeTreeWith(enzyme_id, db)
+		print("SUCCESS :" + enzyme_id + '\n')
 	except Exception,e:
-		print("FAIL "enzyme_id + '\n')
+		print("FAIL :" + enzyme_id + ': ' + e.message)
 		return
 
-:
 
 def insertEnzymeTreeWith(enzyme_id, db):
 	enzyme_obj = KEGG_lib.KEGG_raw2obj( KEGG.getItemContent( enzyme_id ) )
 	if 'ALL_REAC' not in enzyme_obj.keys():
+		print("FAIL: " + enzyme_id + "does no have key ALL_REAC")
 		return
 	if type(enzyme_obj['ALL_REAC']) != list:
 		enzyme_obj['ALL_REAC'] = [enzyme_obj['ALL_REAC']]
 	enzyme_obj['ALL_REAC'] = map( lambda s: re.findall( "R\d{5}", s ), enzyme_obj['ALL_REAC'] )
 	enzyme_obj['ALL_REAC'] = [item for l in enzyme_obj['ALL_REAC'] for item in l]
 	reaction_ids = enzyme_obj['ALL_REAC']
-	print "reaction_ids: "
-	print reaction_ids
+	# print "reaction_ids: "
+	# print reaction_ids
 	reaction_ins = list( )
 	for reaction_id in reaction_ids:
 		reaction_obj = KEGG_lib.KEGG_raw2obj( KEGG.getItemContent( reaction_id ) )
@@ -133,6 +136,8 @@ def insertEnzymeTreeWith(enzyme_id, db):
 		reaction_ins.append( reaction_in )
 	enzyme_obj['REF_REACTION'] = reaction_ins
 	enzyme_in = db.enzyme.insert( enzyme_obj )
+	global COUNT
+	global TOTAL
 	COUNT += 1
 	print("%d / %d completed"%(COUNT, TOTAL))
 
