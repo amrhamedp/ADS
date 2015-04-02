@@ -128,11 +128,21 @@ def insertEnzymeTreeWith(enzyme_id, db):
 		(reactant_ids, outcome_ids) = getReactantsAndOutcomes( reaction_obj )
 		reactant_objs = [KEGG_lib.KEGG_raw2obj( KEGG.getItemContent( "cpd:" + id ) ) for id in reactant_ids]
 		outcome_objs = [KEGG_lib.KEGG_raw2obj( KEGG.getItemContent( "cpd:" + id ) ) for id in outcome_ids]
-		reactant_ins = [db.compound.insert( reactant ) for reactant in reactant_objs]
-		outcome_ins = [db.compound.insert( outcome ) for outcome in outcome_objs]
+		reactant_ins = [db.compound.find_one({'ENTRY':reactant['ENTRY']}) \
+						if db.compound.find_one( {'ENTRY': reactant['ENTRY']} )\
+						else db.compound.insert( reactant )\
+				for reactant in reactant_objs]
+
+		outcome_ins = [db.compound.find_one( {'ENTRY': outcome['ENTRY']} ) \
+						   if db.compound.find_one( {'ENTRY': outcome['ENTRY']} ) \
+						   else db.compound.insert( outcome ) \
+					   for outcome in outcome_objs]
+
 		reaction_obj['REF_REACTANT'] = reactant_ins
 		reaction_obj['REF_OUTCOME'] = outcome_ins
-		reaction_in = db.reaction.insert( reaction_obj )
+		reaction_in = db.reaction.find_one( {'ENTRY': reaction_obj['ENTRY']} )  if db.reaction.find_one({'ENTRY': reaction_obj['ENTRY']}) \
+						else db.reaction.insert( reaction_obj )
+
 		reaction_ins.append( reaction_in )
 	enzyme_obj['REF_REACTION'] = reaction_ins
 	enzyme_in = db.enzyme.insert( enzyme_obj )
