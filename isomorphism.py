@@ -47,7 +47,7 @@ def getReactionCenter(g1, g2):
 				answers.append((key1, key2))
 				break
 
-	return answers
+	return list(set(answers))
 
 
 
