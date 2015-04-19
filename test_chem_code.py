@@ -1,3 +1,5 @@
+__author__ = 'shilin'
+
 import numpy as np
 import scipy as sp
 import networkx
@@ -16,6 +18,7 @@ def input_chem_content(content, input_flag):
 	alpha_flag = 0
 	atom_num = 0
 	G = networkx.Graph( );
+
 	while True:
 		list = filechem.readline( );
 		count_row = count_row + 1
@@ -23,8 +26,10 @@ def input_chem_content(content, input_flag):
 		if count_row==4:
 			atom_num = int( buf[0] )
 			break
-	for i in range( 1, atom_num + 1 ):
-		G.add_node( i )
+
+	# for i in range( 1, atom_num + 1 ):
+	# 	G.add_node( i )
+
 	Chem_Matrix = np.identity( atom_num )
 	for i in filechem.readlines( ):
 		alpha_flag = 0

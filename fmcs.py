@@ -2656,8 +2656,8 @@ def main(args=None):
 
 
 def fmcsWithPath(filename = None, argsString=None):
-	if argsString == None and filename == None: argsString= '/Users/feiyicheng/Desktop/ADS/Develop/tclcactvs000Rsb68B.sdf --output-format complete-sdf --save-counts-tag MCS_COUNTS --save-smarts-tag MCS_SMARTS --save-smiles-tag MCS_SMILES --save-atom-indices-tag MCS_ATOMS'
-	if filename is not None and argsString == None: argsString = filename + ' --output-format complete-sdf --save-counts-tag MCS_COUNTS --save-smarts-tag MCS_SMARTS --save-smiles-tag MCS_SMILES --save-atom-indices-tag MCS_ATOMS'
+	if argsString == None and filename == None: argsString= '/Users/feiyicheng/Desktop/ADS/Develop/tclcactvs000Rsb68B.sdf --output-format=fragment-sdf'
+	if filename is not None and argsString == None: argsString = filename + ' --output-format=fragment-sdf'
 
 	args = argsString.split(" ")
 	lines = open(args[0]).readlines()
