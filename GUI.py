@@ -14,7 +14,6 @@ import testSimilarity
 ## global variables
 mol = None
 BLANK_IMG = Image.new( 'RGB', (500, 300), color='purple')
-# BLANK_IMG.show()
 
 class MyFrame(Frame):
 	def __init__(self):
