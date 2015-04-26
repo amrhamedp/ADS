@@ -77,7 +77,7 @@ def showSimilarMols(mol):
 	print(sims)
 	# for mol in mols:
 	# 	Draw.MolToImage(mol).show()
-	img = Draw.MolsToGridImage(mols, molsPerRow=3, legends=IDs)
+	img = Draw.MolsToGridImage(mols, molsPerRow=3, legends=IDs,subImgSize=(400,400))
 	img.show()
 
 

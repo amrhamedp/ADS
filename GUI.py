@@ -28,7 +28,8 @@ class MyFrame(Frame):
 		# self.canvas.grid(row=2, column=1)
 		self.canvas.pack()
 		self.photo = ImageTk.PhotoImage(BLANK_IMG)
-		self.image_on_canvas = self.canvas.create_image(200, 150, image=self.photo)
+		self.image_on_canvas = self.canvas.create_image(250, 150, image=self.photo)
+		self.label  = Label(self, text="choose a molfile to find similar molecules(.mol suffix supported only currently)").pack()
 		self.loadFileButton = Button( self, text="Browse", command=self.load_file,width = 30).pack()#.grid(column=1,row=1,sticky=(N, ))
 		self.submitButton = Button(self, text="Submit", command = self.submit, width = 40).pack()#.grid( column=1, row=3, sticky=(S, ) )
 
