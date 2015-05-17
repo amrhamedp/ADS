@@ -6,9 +6,9 @@ import tkMessageBox as box
 from rdkit import Chem
 from rdkit.Chem import Draw
 from PIL import Image
-# from Tkinter import PhotoImage
 from PIL import ImageTk
 import testSimilarity
+import webbrowser
 
 
 ## global variables
@@ -38,7 +38,8 @@ class MyFrame(Frame):
 		if mol is None:
 			box.showwarning("warning",'self.mol is None!')
 		else:
-			testSimilarity.showSimilarMols(mol)
+			sims = testSimilarity.showSimilarMols(mol)
+			self._show_PubChemInfo(sims)
 		return
 
 	def load_file(self):
@@ -80,6 +81,25 @@ class MyFrame(Frame):
 		self.photo = ImageTk.PhotoImage( pilImg )
 		self.canvas.itemconfig( self.image_on_canvas, image= self.photo)
 
+	def _show_PubChemInfo(self, sims):
+		## get urls
+		IDs = [id for (_, id, _, _, _) in sims]
+		urls = ["https://pubchem.ncbi.nlm.nih.gov/compound/"+id for id in IDs]
+
+		### construct entrys to show on GUI
+		top = Toplevel()
+		for i in range(len(sims)):
+			label1 = Label( top, text=IDs[i]).grid(row = i+1)
+			urlButton = Button(top, text="open",command=lambda: webbrowser.open(urls[i]) ).grid(row=i+1, column=1)
+			ent1 = Entry( top ,width=50)
+			var1 = StringVar( )
+			var1.set(urls[i] )
+			ent1.config( textvariable=var1 )
+			ent1.grid(row = i+1,column =2)
+
+		return
+
 
 if __name__=="__main__":
 	MyFrame().mainloop()
+	# MmFrame.mainloop()

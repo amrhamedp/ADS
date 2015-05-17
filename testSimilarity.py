@@ -62,23 +62,46 @@ def mostSimilarmols(mol):
 		sml = DataStructs.FingerprintSimilarity(fpIn, fpTmp)
 		results10.update(((moltmp, cpd),sml))
 
-	return results10
+	return [ (tmp,cpd,sml) for ((tmp,cpd),sml) in results10]
 
 
 def showSimilarMols(mol):
-	# img = Draw.MolToImage( mol )
-	# img.show()
+
+	# (mol obj, mongo obj, similarity(float))
 	results = mostSimilarmols( mol )
-	sims = [(mol, scp['id'], s) for ((mol, scp), s) in results]
-	# print(sims)
-	sims = sorted( list( set( sims ) ), key=lambda tp: tp[2], reverse=True )
-	mols = [mol for (mol,_,_) in sims]
-	IDs = [id for (_,id,_) in sims]
+
+	# (mol obj,
+	# KEGG _id\\string,
+	# name\\list,
+	# formula \\
+	# similarity\\float)
+	sims = [(mol, scp['id'], reduce(lambda x,y: "", scp['NAME'],""),scp['FORMULA'],s) for (mol, scp, s) in results]
+
+
+	sims = sorted( list( set( sims ) ), key=lambda tp: tp[4], reverse=True )
+	mols = [mol for (mol,_,_,_,_) in sims]
+	print("hehe")
+	# atoms = mols[0].GetAtoms()
+	# for atom in atoms:
+	# 	print(atom)
+	weights = [reduce(lambda x,y:x + y.GetMass(), mol.GetAtoms() ,0) for mol in mols]
+	IDs = [id for (_,id,_,_,_) in sims]
+	formulas  = [formula for (_,_,_,formula,_) in sims]
+
+	legends = [
+		"ID: " + IDs[i] + " "
+	+ "formula: " + formulas[i] + "\n"
+	+ "weight: " + str(weights[i])
+	# +	"NAME: " + names[i] + "\n"
+		for i in range(len(sims))
+	]
 	print(sims)
 	# for mol in mols:
 	# 	Draw.MolToImage(mol).show()
-	img = Draw.MolsToGridImage(mols, molsPerRow=3, legends=IDs,subImgSize=(400,400))
+	img = Draw.MolsToGridImage(mols, molsPerRow=3, legends=legends,subImgSize=(400,400))
 	img.show()
+
+	return sims
 
 
 
